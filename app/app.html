@@ -1,0 +1,40 @@
+<div class="container">
+    <h1>AEGIS</h1>
+    <h2  ng-show="!model.firstTime">Welcome, {{model.user.name}}!</h2>
+
+    <div ng-show="model.firstTime">
+        <form class="form">
+            <div class="form-item">
+                <p>Name:</p>
+                <input type="text" ng-model="user.name" required />
+            </div>
+            <div>
+                <p>Phone:</p>
+                <input type="tel" ng-model="user.phone" required />
+            </div>
+            <div>
+                <p>Latitude:</p>
+                <input type="text" ng-model="user.latitude" required />
+            </div>
+            <div>
+                <p>Longitude:</p>
+                <input type="text" ng-model="user.longitude" required />
+            </div>
+            <div>
+                <p>Pin:</p>
+                <input type="text" ng-model="user.pin" required />
+            </div>
+            <br>
+            <input type="submit" ng-click="model.submitUserInfo(user)" value="Save" />
+        </form>
+    </div>
+
+    <div ng-show="!model.firstTime">
+        <h3 ng-show="!model.policeCalled">Press The Shield To Send Police!</h3>
+        <div ng-show="!model.policeCalled" class="panicButton" ng-click="model.panicClicked()"></div>
+
+        <h3 ng-show="model.policeCalled">Press The X To Dismiss Police!</h3>
+        <div ng-show="model.policeCalled" class="cancelButton" ng-click="model.cancelPanic()"></div>
+    </div>
+
+</div>

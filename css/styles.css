@@ -1,0 +1,46 @@
+.container {
+    height: 100%;
+    width: 100%;
+    text-align: center;
+    font-family: 'Yatra One', cursive;
+    background-image: url("https://s-media-cache-ak0.pinimg.com/originals/2c/93/81/2c9381fb2a011da357e9f4550cd2a826.jpg");
+    background-repeat: no-repeat;
+    background-size: cover;
+    background-position: center;
+}
+
+.panicButton {
+    height: 250px;
+    width: 250px;
+    margin: 0 auto;
+    background-image: url("../src/Aegis_Large.png");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
+.panicButton:hover{
+    cursor: pointer;
+}
+
+.cancelButton {
+    height: 250px;
+    width: 250px;
+    margin: 0 auto;
+    background-image: url("../src/cancel.png");
+    background-repeat: no-repeat;
+    background-size: contain;
+    background-position: center;
+}
+
+.cancelButton:hover {
+    cursor: pointer;
+}
+
+h1 {
+    font-size: 45px;
+}
+
+.form-item{
+
+}
