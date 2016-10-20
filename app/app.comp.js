@@ -24,10 +24,10 @@
             address: '',
             city: '',
             state: '',
-            'pin': ''
-        }
+            pin: ''
+        };
 
-        if (firstTime != 'firstTime'){
+        if (firstTime != 'firstTime') {
             model.firstTime = true;
 
             var user = $cookies.getObject('userInfo');
@@ -58,11 +58,14 @@
                 console.log(position.coords.latitude, position.coords.longitude);
                 lat = position.coords.latitude;
                 long = position.coords.longitude;
+                
+                getAddressFromGeolocation(lat, long, setUserLocation);
             });
-
-            setTimeout(function(){
-
-                unirest.post('https://maps.googleapis.com/maps/api/geocode/json?latlng='+ lat +','+ long +'&key=AIzaSyA4fRk6sfUIYmjIG4rRL3SAF4eALmw1lqM')
+        }
+        
+        
+        function getAddressFromGeolocation (lat, lng, callback){
+                unirest.post('https://maps.googleapis.com/maps/api/geocode/json?latlng='+ lat +','+ lng +'&key=AIzaSyA4fRk6sfUIYmjIG4rRL3SAF4eALmw1lqM')
                     .end(function (response) {
 
                     var streetNumber =  response.body.results[0].address_components[0].short_name; // Number
@@ -71,14 +74,18 @@
                     var city = response.body.results[0].address_components[2].short_name; // City
                     var state = response.body.results[0].address_components[4].short_name; // State
 
-                    // Pause and Update the model
-                    $timeout(function() {
-                        model.user.address = fullAddress;
-                        model.user.city = city;
-                        model.user.state = state;
-                    }, 500);
+                    callback(fullAddress, city, state);
                 });
+        }
+        
+        function setUserLocation(fullAddress, city, state){
+            $timeout(function(){
+                model.user.address = fullAddress;
+                model.user.city = city;
+                model.user.state = state;
+                console.log(model.user);
             }, 500)
+
         }
 
         model.panicClicked = function(){
