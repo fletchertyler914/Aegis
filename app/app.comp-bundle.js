@@ -4,16 +4,29 @@
     var module = angular.module('app')
         .component('appComponent', {
             templateUrl: 'app/app.html',
-            controller: ['$cookies','ngDialog', controller],
+            controller: ['$cookies','ngDialog', '$timeout', controller],
             controllerAs: 'model'
         })
 
-    function controller($cookies, ngDialog) {
+    function controller($cookies, ngDialog, $timeout) {
         var model = this;
         var unirest = require('unirest');
         var firstTime = $cookies.get('firstTime');
         var globalResponseID;
         model.policeCalled = false;
+
+        model.user = {
+            'name': '',
+            'phone': '',
+            'location': {
+                'latitude': '',
+                'longitude': ''
+            },
+            address: '',
+            city: '',
+            state: '',
+            'pin': ''
+        }
 
         if (firstTime != 'firstTime'){
             model.firstTime = true;
@@ -37,6 +50,36 @@
                 model.firstTime = false;
                 model.user = $cookies.getObject('userInfo');
             }
+        }
+
+        if ("geolocation" in navigator) {
+            /* geolocation is available */
+            var lat, long;
+            navigator.geolocation.getCurrentPosition(function(position) {
+                console.log(position.coords.latitude, position.coords.longitude);
+                lat = position.coords.latitude;
+                long = position.coords.longitude;
+            });
+
+            setTimeout(function(){
+
+                unirest.post('https://maps.googleapis.com/maps/api/geocode/json?latlng='+ lat +','+ long +'&key=AIzaSyA4fRk6sfUIYmjIG4rRL3SAF4eALmw1lqM')
+                    .end(function (response) {
+
+                    var streetNumber =  response.body.results[0].address_components[0].short_name; // Number
+                    var streetName =  response.body.results[0].address_components[1].short_name; // Name
+                    var fullAddress = streetNumber + " " + streetName; // Number & Name
+                    var city = response.body.results[0].address_components[2].short_name; // City
+                    var state = response.body.results[0].address_components[4].short_name; // State
+
+                    // Pause and Update the model
+                    $timeout(function() {
+                        model.user.address = fullAddress;
+                        model.user.city = city;
+                        model.user.state = state;
+                    }, 500);
+                });
+            }, 500)
         }
 
         model.panicClicked = function(){
@@ -96,15 +139,31 @@
         }
 
         model.submitUserInfo = function(user){
+            var streetAdress = user.address;
+            var streetAddressSplit = streetAdress.split(" ")
+            var streetAddressFixed = streetAddressSplit.join("+");
+            var city = user.city;
+            var state = user.state;
+
+            unirest.post('https://maps.googleapis.com/maps/api/geocode/json?address='+ streetAddressFixed + '&key=AIzaSyA4fRk6sfUIYmjIG4rRL3SAF4eALmw1lqM')
+                .end(function (response) {
+                var geolocation = response.body.results[0].geometry.location;
+                user.latitude = geolocation.lat;
+                user.longitude = geolocation.lng;
+                console.log("Lat: " + user.latitude + "\nLong: " + user.longitude);
+            });
 
             var userInfo = {
-                'name': user.name,
-                'phone': user.phone,
-                'location': {
-                    'latitude': user.latitude,
-                    'longitude': user.longitude
+                name: user.name,
+                phone: user.phone,
+                location: {
+                    latitude: user.latitude,
+                    longitude: user.longitude
                 },
-                'pin': user.pin
+                address: user.address,
+                city: user.city,
+                state: user.state,
+                pin: user.pin
             }
 
             $cookies.putObject('userInfo', userInfo);
@@ -113,7 +172,6 @@
                 location.reload();
             },500)
         }
-
     }
 }());
 

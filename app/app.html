@@ -6,26 +6,30 @@
         <form class="form">
             <div class="form-item">
                 <p>Name:</p>
-                <input type="text" ng-model="user.name" required />
+                <input type="text" ng-model="model.user.name" required />
             </div>
             <div>
                 <p>Phone:</p>
-                <input type="tel" ng-model="user.phone" required />
+                <input type="tel" ng-model="model.user.phone" required />
             </div>
             <div>
-                <p>Latitude:</p>
-                <input type="text" ng-model="user.latitude" required />
+                <p>Street Address:</p>
+                <input type="text" id="fullAddress" ng-model="model.user.address" required />
             </div>
             <div>
-                <p>Longitude:</p>
-                <input type="text" ng-model="user.longitude" required />
+                <p>City:</p>
+                <input type="text" id="city" ng-model="model.user.city" required />
+            </div>
+            <div>
+                <p>State:</p>
+                <input type="text" id="state" ng-model="model.user.state" required />
             </div>
             <div>
                 <p>Pin:</p>
-                <input type="text" ng-model="user.pin" required />
+                <input type="text" ng-model="model.user.pin" required />
             </div>
             <br>
-            <input type="submit" ng-click="model.submitUserInfo(user)" value="Save" />
+            <input type="submit" ng-click="model.submitUserInfo(model.user)" value="Save" />
         </form>
     </div>
 
