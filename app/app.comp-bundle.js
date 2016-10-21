@@ -30965,6 +30965,9 @@ function extend() {
                 getAddressFromGeolocation(lat, long, setUserLocation);
             });
         }
+        else{
+            alert("Geolocation Not Available.");
+        }
         
         
         function getAddressFromGeolocation (lat, lng, callback){
@@ -30987,7 +30990,7 @@ function extend() {
                 model.user.city = city;
                 model.user.state = state;
                 console.log(model.user);
-            }, 500)
+            }, 200)
 
         }
 

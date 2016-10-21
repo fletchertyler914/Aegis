@@ -3,7 +3,7 @@ body {
     width: 100%;
     text-align: center;
     font-family: 'Yatra One', cursive;
-    background-image: url("https://s-media-cache-ak0.pinimg.com/originals/2c/93/81/2c9381fb2a011da357e9f4550cd2a826.jpg");
+    background-image: url("../src/paper_background_1.jpg");
     background-repeat: repeat;
     background-size: cover;
     background-position: center;
