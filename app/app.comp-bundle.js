@@ -30912,11 +30912,20 @@ function extend() {
 
     function controller($cookies, ngDialog, $timeout) {
         var model = this;
+        
+        // We use unirest to post to the SendPolice API
         var unirest = require('unirest');
+        
+        // Set our "First Time Cookie"
         var firstTime = $cookies.get('firstTime');
+        
+        //Set our globalResponseID in case of cancellation 
         var globalResponseID;
+        
+        // Police called = false for shield view
         model.policeCalled = false;
 
+        // Set our empty user object
         model.user = {
             'name': '',
             'phone': '',
@@ -30930,74 +30939,44 @@ function extend() {
             pin: ''
         };
 
+        // If the user doesnt have a "first time" cookie, set them up
         if (firstTime != 'firstTime') {
             model.firstTime = true;
-
+            // See if they have a userInfo cookie
             var user = $cookies.getObject('userInfo');
 
+            // If so, readd the firstTime cookie and go to home
             if (user != null){
                     $cookies.put('firstTime', 'firstTime');
                     model.firstTime = false;
                     model.user = $cookies.getObject('userInfo');
                 }
         }
+        // If the user does have a firstTime cookie
         else{
+            // Fetch the userInfo cookie
             var user = $cookies.getObject('userInfo');
 
+            // If there is no userInfo cookie, set them up again
             if (user == null){
                 $cookies.put('firstTime', 'firstTime');
                 model.firstTime = true;
             }
+            // If there is, set their user cookie to the user model
             else{
                 model.firstTime = false;
                 model.user = $cookies.getObject('userInfo');
             }
         }
 
-        if ("geolocation" in navigator) {
-            /* geolocation is available */
-            var lat, long;
-            navigator.geolocation.getCurrentPosition(function(position) {
-                console.log(position.coords.latitude, position.coords.longitude);
-                lat = position.coords.latitude;
-                long = position.coords.longitude;
-                
-                getAddressFromGeolocation(lat, long, setUserLocation);
-            });
-        }
-        else{
-            alert("Geolocation Not Available.");
-        }
-        
-        
-        function getAddressFromGeolocation (lat, lng, callback){
-                unirest.post('https://maps.googleapis.com/maps/api/geocode/json?latlng='+ lat +','+ lng +'&key=AIzaSyA4fRk6sfUIYmjIG4rRL3SAF4eALmw1lqM')
-                    .end(function (response) {
-
-                    var streetNumber =  response.body.results[0].address_components[0].short_name; // Number
-                    var streetName =  response.body.results[0].address_components[1].short_name; // Name
-                    var fullAddress = streetNumber + " " + streetName; // Number & Name
-                    var city = response.body.results[0].address_components[2].short_name; // City
-                    var state = response.body.results[0].address_components[4].short_name; // State
-
-                    callback(fullAddress, city, state);
-                });
-        }
-        
-        function setUserLocation(fullAddress, city, state){
-            $timeout(function(){
-                model.user.address = fullAddress;
-                model.user.city = city;
-                model.user.state = state;
-                console.log(model.user);
-            }, 200)
-
-        }
-
+        // Panic Clicked Method
         model.panicClicked = function(){
+            // Grab the user cookie
             var user = $cookies.getObject('userInfo');
+            // Set called police = true to display the 'X' to cancel
             model.policeCalled = true;
 
+            // Set the POST body to the userInfo cookie data
             var body = {
                 name: user.name,
                 phone: user.phone,
@@ -31009,30 +30988,44 @@ function extend() {
                 pin: user.pin,
             }
 
+            // POST the userInfo data
             unirest.post('https://sandbox.sendpolice.com/v1/alerts?user_key=ffee1740f8f9a955a9157900227014e8')
                 .type('json')
                 .send(body)
                 .end(function (response) {
                 var sendResponseID = response.raw_body._id;
+                // If we get a response, store the ID globally
                 if(sendResponseID != null){
                     globalResponseID = sendResponseID;
                     console.log("Global Response ID: "+ globalResponseID);
                 }
+                // Something happened with the POST, alert and set to policeCalled to false
+                else {
+                    alert("Something Went Wrong, Please Try Again!");
+                    model.policeCalled = false;
+                }
            });
         }
 
+        // Cancel Panic Method
         model.cancelPanic = function() {
+            // Grab the userInfo Cookie
             var user = $cookies.getObject('userInfo');
+            
+            // Prompt the user to enter their pin
             var pin = prompt("Please enter your pin", "");
 
+            // If Pin is incorrect, dont cancel
             if (pin != user.pin) {
                 alert("PIN INCORRECT!");
             }
             else{
+                // Set the body status to 2 (Cancel)
                 var body = {
                     status: 2
                 };
 
+                // POST the response id with the cancel status
                 unirest.post('https://sandbox.sendpolice.com/v1/alerts/' + globalResponseID + '/statuses?user_key=ffee1740f8f9a955a9157900227014e8')
                     .type('json')
                     .send(body)
@@ -31046,17 +31039,22 @@ function extend() {
                     }
                 });
 
+                // Finaly, remove the "Cancel Police" view and go back to the shield view
                 model.policeCalled = false;
             }
         }
 
+        // If first time, collect user data and store as a cookie
         model.submitUserInfo = function(user){
+            // Google API specific address format
+            // Exp: "123+Easy+Street+North"
             var streetAdress = user.address;
             var streetAddressSplit = streetAdress.split(" ")
             var streetAddressFixed = streetAddressSplit.join("+");
             var city = user.city;
             var state = user.state;
 
+            // Use Google reverse geocoder to get latitude and longitude from physical address
             unirest.post('https://maps.googleapis.com/maps/api/geocode/json?address='+ streetAddressFixed + '&key=AIzaSyA4fRk6sfUIYmjIG4rRL3SAF4eALmw1lqM')
                 .end(function (response) {
                 var geolocation = response.body.results[0].geometry.location;
@@ -31065,6 +31063,7 @@ function extend() {
                 console.log("Lat: " + user.latitude + "\nLong: " + user.longitude);
             });
 
+            // Store all user data in an object
             var userInfo = {
                 name: user.name,
                 phone: user.phone,
@@ -31078,8 +31077,11 @@ function extend() {
                 pin: user.pin
             }
 
+            // Save the userInfo object as a cookie
             $cookies.putObject('userInfo', userInfo);
             model.userStored = true;
+            
+            // Workaround to reload the view after saving the cookie
             setTimeout(function(){
                 location.reload();
             },500)

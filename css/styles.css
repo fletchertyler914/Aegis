@@ -45,3 +45,28 @@ body > app-component > div > div > form > div > p {
     margin: 10px;
     padding: 0px;
 }
+
+.btn {
+    -webkit-border-radius: 28;
+    -moz-border-radius: 28;
+    border-radius: 10px;
+    border-color: black;
+    color: #000000;
+    font-size: 20px;
+    font-family: 'Yatra One', cursive;
+    background: cornsilk;
+    padding: 5px 10px 5px 10px;
+    text-decoration: none;
+}
+
+.btn[disabled]{
+    opacity: 0.4;
+}
+
+input {
+    font-family: 'Yatra One', cursive;
+    border-radius: 4px;
+    background-color: cornsilk;
+    border: none;
+    height: 24px;
+}
