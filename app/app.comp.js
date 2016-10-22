@@ -89,7 +89,7 @@
                     model.countDown--;
                 }
                 else {
-                    alert("times up");
+                    model.cancelDisabled = true;
                 }
             }
             mytimeout = $timeout(model.onTimeout,1000);
