@@ -38,6 +38,7 @@
         <div ng-show="!model.policeCalled" class="panicButton" ng-click="model.panicClicked()"></div>
 
         <h3 ng-show="model.policeCalled">Press The X To Dismiss Police!</h3>
+        <h4 ng-show="model.policeCalled">{{model.countDown}} Seconds Remaining!</h4>
         <div ng-show="model.policeCalled" class="cancelButton" ng-click="model.cancelPanic()"></div>
     </div>
 

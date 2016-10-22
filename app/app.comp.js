@@ -64,15 +64,39 @@
                 model.firstTime = false;
                 model.user = $cookies.getObject('userInfo');
             }
-        }
-
+        }            
+        var mytimeout;
+        
         // Panic Clicked Method
         model.panicClicked = function(){
             // Grab the user cookie
             var user = $cookies.getObject('userInfo');
+            
+            // What we are sending to the API
+            console.log(user);
+            
             // Set called police = true to display the 'X' to cancel
             model.policeCalled = true;
-
+            
+            // Call the API to send the Police
+            sendPolice(user);
+            
+            // Start Timer for cancellation
+            model.countDown = 10
+            model.onTimeout = function(){
+                if (model.countDown > 0) {
+                    mytimeout = $timeout(model.onTimeout,1000);
+                    model.countDown--;
+                }
+                else {
+                    alert("times up");
+                }
+            }
+            mytimeout = $timeout(model.onTimeout,1000);
+            
+        }
+        
+        function sendPolice(user){
             // Set the POST body to the userInfo cookie data
             var body = {
                 name: user.name,
@@ -90,18 +114,23 @@
                 .type('json')
                 .send(body)
                 .end(function (response) {
-                var sendResponseID = response.raw_body._id;
-                // If we get a response, store the ID globally
-                if(sendResponseID != null){
-                    globalResponseID = sendResponseID;
-                    console.log("Global Response ID: "+ globalResponseID);
-                }
-                // Something happened with the POST, alert and set to policeCalled to false
-                else {
-                    alert("Something Went Wrong, Please Try Again!");
-                    model.policeCalled = false;
-                }
-           });
+                    var sendResponseID = response.raw_body._id;
+                    // If we get a response, store the ID globally
+                    if(sendResponseID != null){
+                        globalResponseID = sendResponseID;
+                        console.log("Requested ID: "+ globalResponseID);
+                    }
+                    // Something happened with the POST, alert and set to policeCalled to false
+                    else {
+                        alert("Police Request Failed, Please Try Again!");
+                        model.policeCalled = false;
+                    }
+               });
+        }
+        
+        function resetTimer(){
+            $timeout.cancel(mytimeout);
+            model.countDown = 10;
         }
 
         // Cancel Panic Method
@@ -110,13 +139,22 @@
             var user = $cookies.getObject('userInfo');
             
             // Prompt the user to enter their pin
-            var pin = prompt("Please enter your pin", "");
+            var pin = prompt("Please Enter Your Pin");
 
             // If Pin is incorrect, dont cancel
             if (pin != user.pin) {
-                alert("PIN INCORRECT!");
+                alert("Pin Authentication Failed!")
             }
-            else{
+            else{   
+                resetTimer();
+                cancelPolice();
+                
+                // Finaly, remove the "Cancel Police" view and go back to the shield view
+                model.policeCalled = false;
+            }
+        }
+        
+        function cancelPolice(){
                 // Set the body status to 2 (Cancel)
                 var body = {
                     status: 2
@@ -128,17 +166,14 @@
                     .send(body)
                     .end(function (response) {
                     var cancelResponseID = response.raw_body._id;
-                    console.log(cancelResponseID);
                     if (cancelResponseID == null) {
-                        alert("Something Went Wrong");
+                        alert("Request Failed, Please Try Again!");
+                        console.log(cancelResponseID);
                     } else {
-                        alert("Police Cancelled");
+                        alert("Police Cancelled!");
+                        console.log("Cancelled ID: " + cancelResponseID);
                     }
                 });
-
-                // Finaly, remove the "Cancel Police" view and go back to the shield view
-                model.policeCalled = false;
-            }
         }
 
         // If first time, collect user data and store as a cookie
@@ -150,23 +185,30 @@
             var streetAddressFixed = streetAddressSplit.join("+");
             var city = user.city;
             var state = user.state;
+            
+            // Format it all together
+            var apiAddress = streetAddressFixed + "+" + city + "+" + state;
 
             // Use Google reverse geocoder to get latitude and longitude from physical address
-            unirest.post('https://maps.googleapis.com/maps/api/geocode/json?address='+ streetAddressFixed + '&key=AIzaSyA4fRk6sfUIYmjIG4rRL3SAF4eALmw1lqM')
+            unirest.post('https://maps.googleapis.com/maps/api/geocode/json?address='+ apiAddress + '&key=AIzaSyA4fRk6sfUIYmjIG4rRL3SAF4eALmw1lqM')
                 .end(function (response) {
                 var geolocation = response.body.results[0].geometry.location;
-                user.latitude = geolocation.lat;
-                user.longitude = geolocation.lng;
-                console.log("Lat: " + user.latitude + "\nLong: " + user.longitude);
+                var latitude = geolocation.lat;
+                var longitude = geolocation.lng;
+                console.log("Lat: " + latitude + "\nLong: " + longitude);
+                
+                createCookie(user, latitude, longitude)
             });
-
+        }
+        
+        function createCookie(user, latitude, longitude){
             // Store all user data in an object
             var userInfo = {
                 name: user.name,
                 phone: user.phone,
                 location: {
-                    latitude: user.latitude,
-                    longitude: user.longitude
+                    latitude: latitude,
+                    longitude: longitude
                 },
                 address: user.address,
                 city: user.city,
@@ -178,10 +220,12 @@
             $cookies.putObject('userInfo', userInfo);
             model.userStored = true;
             
+            console.log($cookies.getObject('userInfo'));
+            
             // Workaround to reload the view after saving the cookie
             setTimeout(function(){
                 location.reload();
-            },500)
+            }, 500)
         }
     }
 }());
