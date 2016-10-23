@@ -1,16 +1,13 @@
 {
-  "name": "NgSteem",
+  "name": "Aegis",
   "version": "1.0.0",
-  "description": "AngularJS 1.5.8 Boilerplate With Steem.JS Library",
+  "description": "Rasberry Pi Powered Panic Button",
   "main": "index.js",
   "keywords": [
-    "angular",
-    "angularjs",
-    "steem",
-    "steemit",
-    "blockchain",
-    "steemjs",
-    "cryptocurrency"
+      "angular",
+      "angularjs",
+      "sendpolice",
+      "security"
   ],
   "author": "Tyler Fletcher <fletchertyler914@yahoo.com> (https://github.com/fletchertyler914)",
   "dependencies": {

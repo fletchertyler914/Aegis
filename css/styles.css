@@ -1,3 +1,4 @@
+/* Body Style */
 body {
     height: 100%;
     width: 100%;
@@ -9,6 +10,18 @@ body {
     background-position: center;
 }
 
+/* Main Header (Welcome) */
+h1 {
+    font-size: 45px;
+}
+
+/* Timer Text Style */
+body > app-component > div > div > form > div > p {
+    margin: 10px;
+    padding: 0px;
+}
+
+/* Panice Button (Shield) Style */
 .panicButton {
     height: 250px;
     width: 250px;
@@ -23,6 +36,7 @@ body {
     cursor: pointer;
 }
 
+/* Cancel Button ('X') Style */
 .cancelButton {
     height: 250px;
     width: 250px;
@@ -37,15 +51,7 @@ body {
     cursor: pointer;
 }
 
-h1 {
-    font-size: 45px;
-}
-
-body > app-component > div > div > form > div > p {
-    margin: 10px;
-    padding: 0px;
-}
-
+/* Subit Button Style */
 .btn {
     -webkit-border-radius: 28;
     -moz-border-radius: 28;
@@ -63,6 +69,7 @@ body > app-component > div > div > form > div > p {
     opacity: 0.4;
 }
 
+/* Input Style */
 input {
     font-family: 'Yatra One', cursive;
     border-radius: 4px;
