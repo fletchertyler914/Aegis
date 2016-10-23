@@ -30984,7 +30984,7 @@ function extend() {
             // Call the API to send the Police
             sendPolice(user);
             
-            // Start Timer for cancellation
+            // Start 10 Sec Timer for Police Cancellation
             model.countDown = 10
             model.onTimeout = function(){
                 if (model.countDown > 0) {
@@ -30992,9 +30992,12 @@ function extend() {
                     model.countDown--;
                 }
                 else {
+                    // If Pin Not entered And Timer = 0
+                    // Remove Cancel Button From View
                     model.cancelDisabled = true;
                 }
             }
+            // Create a variable to interact with the timer (Start/Stop)
             mytimeout = $timeout(model.onTimeout,1000);
             
         }
@@ -31048,7 +31051,8 @@ function extend() {
             if (pin != user.pin) {
                 alert("Pin Authentication Failed!")
             }
-            else{   
+            else{ 
+                // If Pin Entered Correctly, Cancel Timer and Police
                 resetTimer();
                 cancelPolice();
                 
